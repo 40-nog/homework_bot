@@ -1,4 +1,3 @@
-
 import telegram
 import time
 import os
@@ -9,12 +8,11 @@ import sys
 
 load_dotenv
 
-
 logging.basicConfig(
     filename='hw_logger.log',
     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
     level=logging.DEBUG
-    )
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -37,7 +35,6 @@ HOMEWORK_STATUSES = {
 }
 
 
-
 def send_message(bot, message):
     """Отправляет сообщение в чат Телеграм."""
     try:
@@ -48,8 +45,10 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """Делает запрос к API-серверу, в случае успеха возвращает ответ,
-    преобразовав его к типам данных Python."""
+    """
+    Делает запрос к API-серверу, в случае успеха возвращает ответ,
+    преобразовав его к типам данных Python.
+    """
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
@@ -67,8 +66,10 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """Проверяет ответ API на корректность, в случае успешного ответа
-    возвращает список домашних работ."""
+    """
+    Проверяет ответ API на корректность, в случае успешного ответа
+    возвращает список домашних работ.
+    """
     if type(response) != dict:
         error_message = 'Некорректный ответ сервера'
         logging.error(error_message)
@@ -88,7 +89,7 @@ def check_response(response):
         raise ValueError(error_message)
     homework = homeworks[0]
     return homework
-     
+
 
 def parse_status(homework):
     """Возвращает статус домашней работы."""
@@ -114,7 +115,7 @@ def parse_status(homework):
 
 def check_tokens():
     """Проверяет доступность переменных окружения."""
-    tokens =  {
+    tokens = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
         'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
@@ -126,18 +127,16 @@ def check_tokens():
         return True
 
 
-
 def main():
     """Основная логика работы бота."""
-
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
-
     send_message(bot, f'Привет!')
 
     while True:
         try:
             response = get_api_answer(current_timestamp)
+
             if response:
                 homework = check_response(response)
                 logging.info('Обновлен статус домашней работы')
@@ -146,6 +145,7 @@ def main():
 
             current_timestamp = current_timestamp
             time.sleep(RETRY_TIME)
+
             if message:
                 send_message(bot, message)
             time.sleep(RETRY_TIME)
@@ -156,7 +156,6 @@ def main():
             bot.send_message(TELEGRAM_CHAT_ID, message)
             time.sleep(RETRY_TIME)
             
-
 
 if __name__ == '__main__':
     main()
