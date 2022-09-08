@@ -6,9 +6,8 @@ import logging
 import requests
 from dotenv import load_dotenv
 import sys
-#from logging.handlers import StreamHandler
 
-load_dotenv()
+load_dotenv
 
 
 logging.basicConfig(
@@ -19,13 +18,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-#formatter = logging.Formatter(
-#    '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-#)
-#handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(logging.StreamHandler(sys.stdout))
-#handler.setFormatter(formatter)
-
 
 
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
@@ -58,7 +51,7 @@ def get_api_answer(current_timestamp):
     """Делает запрос к API-серверу, в случае успеха возвращает ответ,
     преобразовав его к типам данных Python."""
     timestamp = current_timestamp or int(time.time())
-    params = {'from_date': 0}
+    params = {'from_date': timestamp}
     try:
         response = requests.get(
             ENDPOINT,
@@ -71,8 +64,6 @@ def get_api_answer(current_timestamp):
         logging.error('Сервер не отвечает, код ответа: {response.status_code}')
         raise Exception('Ошибка ответа сервера')
     return response.json()
-    
-    
 
 
 def check_response(response):
@@ -87,57 +78,51 @@ def check_response(response):
         logging.error(error_message)
         raise KeyError(error_message)
     homeworks = response.get('homeworks')
-    #if response == {}:
-    #    raise Exception('Пустой словарь response')
     if type(homeworks) != list:
         error_message = 'homeworks не является списком'
         logging.error(error_message)
         raise TypeError(error_message)
-    #if 'homeworks' not in response:
-    #    raise Exception('Ошибка ключа homeworks')
-    #if type(response.get('homeworks')) != list:
-    #    raise TypeError('Ключ homeworks не является списком')
     if len(homeworks) == 0:
         error_message = 'Пустой список домашних работ'
         logging.error(error_message)
         raise ValueError(error_message)
-    #if homework == []:
-    #    return {}
-    
     homework = homeworks[0]
     return homework
      
 
-
 def parse_status(homework):
     """Возвращает статус домашней работы."""
-    if homework == {}:
-        return None
-    else:
-        homework_name = homework['homework_name']
-        homework_status = homework['status']
-
-    if not homework_name:
-        logging.error('Отсутствует ключ homework_name')
-    
+    if 'homework_name' not in homework:
+        error_message = 'Ключ homework_name отсутствует'
+        logging.error(error_message)
+        raise KeyError(error_message)
+    if 'status' not in homework:
+        error_message = 'Ключ status отсутствует'
+        logging.error(error_message)
+        raise KeyError(error_message)
+    homework_name = homework.get('homework_name')
+    homework_status = homework.get('status')
+    if homework_name is None or homework_status is None:
+        return 'Работа не сдана на проверку'
     if homework_status not in HOMEWORK_STATUSES:
-        logging.error('Статус домашней работы неизвестен')
-
+        error_message = 'Неизвестный статус домашней работы'
+        logging.error(error_message)
+        raise Exception(error_message)
     verdict = HOMEWORK_STATUSES[homework_status]
-    
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
-    
+
 
 def check_tokens():
     """Проверяет доступность переменных окружения."""
-    TOKENS = [PRACTICUM_TOKEN,
-        TELEGRAM_TOKEN,
-        TELEGRAM_CHAT_ID
-    ]
-    if not all(TOKENS):
-        logging.CRITICAL('Отсутствуют переменные окружения')
-        return False
-    else:
+    tokens =  {
+        'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
+        'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
+        'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
+    }
+    for key, value in tokens.items():
+        if value is None:
+            logger.critical(f'Отсутствует переменная окружения {key}.')
+            return False
         return True
 
 
