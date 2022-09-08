@@ -46,8 +46,8 @@ def send_message(bot, message):
 
 def get_api_answer(current_timestamp):
     """
-    Делает запрос к API-серверу, в случае успеха возвращает ответ,
-    преобразовав его к типам данных Python.
+    Делает запрос к API-серверу.
+    В случае успеха возвращает ответ, преобразовав его к типам данных Python.
     """
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
@@ -67,8 +67,8 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """
-    Проверяет ответ API на корректность, в случае успешного ответа
-    возвращает список домашних работ.
+    Проверяет ответ API на корректность.
+    В случае успешного ответа возвращает список домашних работ.
     """
     if type(response) != dict:
         error_message = 'Некорректный ответ сервера'
@@ -131,7 +131,7 @@ def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
-    send_message(bot, f'Привет!')
+    send_message(bot, 'Привет!')
 
     while True:
         try:
@@ -155,7 +155,7 @@ def main():
             logging.error(message)
             bot.send_message(TELEGRAM_CHAT_ID, message)
             time.sleep(RETRY_TIME)
-            
+
 
 if __name__ == '__main__':
     main()
