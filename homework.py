@@ -37,6 +37,7 @@ HOMEWORK_STATUSES = {
 
 def send_message(bot, message):
     """Отправляет сообщение в чат Телеграм."""
+    logging.info('Пробуем отправить сообщение')
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logging.info('Сообщение успешно отправлено')
@@ -49,6 +50,7 @@ def get_api_answer(current_timestamp):
     Делает запрос к API-серверу.
     В случае успеха возвращает ответ, преобразовав его к типам данных Python.
     """
+    logger.info('Попытка подключения к API')
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
@@ -58,9 +60,9 @@ def get_api_answer(current_timestamp):
             params=params
         )
     except Exception as error:
-        logging.error(f'Ошибка запроса к серверу: {error}')
+        logging.error(f'Ошибка запроса к серверу: {error}, {HEADERS}, {params}')
     if response.status_code != 200:
-        logging.error('Сервер не отвечает, код ответа: {response.status_code}')
+        logging.error(f'Сервер не отвечает, код ответа: {response.status_code}')
         raise Exception('Ошибка ответа сервера')
     return response.json()
 
@@ -70,7 +72,8 @@ def check_response(response):
     Проверяет ответ API на корректность.
     В случае успешного ответа возвращает список домашних работ.
     """
-    if type(response) != dict:
+    logger.info('Начата проверка ответа сервера')
+    if not isinstance(response, dict):
         error_message = 'Некорректный ответ сервера'
         logging.error(error_message)
         raise TypeError(error_message)
@@ -79,7 +82,7 @@ def check_response(response):
         logging.error(error_message)
         raise KeyError(error_message)
     homeworks = response.get('homeworks')
-    if type(homeworks) != list:
+    if not isinstance(homeworks, list):
         error_message = 'homeworks не является списком'
         logging.error(error_message)
         raise TypeError(error_message)
@@ -121,7 +124,7 @@ def check_tokens():
         'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
     }
     for key, value in tokens.items():
-        if value is None:
+        if value == None:
             logger.critical(f'Отсутствует переменная окружения {key}.')
             return False
         return True
@@ -129,6 +132,11 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
+    if not check_tokens():
+        error_message = 'Токены недоступны'
+        logging.error(error_message)
+        raise SystemExit(error_message)
+    
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     send_message(bot, 'Привет!')
@@ -155,6 +163,7 @@ def main():
             logging.error(message)
             bot.send_message(TELEGRAM_CHAT_ID, message)
             time.sleep(RETRY_TIME)
+    
 
 
 if __name__ == '__main__':
