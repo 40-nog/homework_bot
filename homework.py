@@ -60,9 +60,13 @@ def get_api_answer(current_timestamp):
             params=params
         )
     except Exception as error:
-        logging.error(f'Ошибка запроса к серверу: {error}, {HEADERS}, {params}')
+        logging.error(
+            f'Ошибка запроса к серверу: {error}, {HEADERS}, {params}'
+        )
     if response.status_code != 200:
-        logging.error(f'Сервер не отвечает, код ответа: {response.status_code}')
+        logging.error(
+            f'Сервер не отвечает, код ответа: {response.status_code}'
+        )
         raise Exception('Ошибка ответа сервера')
     return response.json()
 
@@ -124,7 +128,7 @@ def check_tokens():
         'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
     }
     for key, value in tokens.items():
-        if value == None:
+        if value is None:
             logger.critical(f'Отсутствует переменная окружения {key}.')
             return False
         return True
@@ -136,7 +140,7 @@ def main():
         error_message = 'Токены недоступны'
         logging.error(error_message)
         raise SystemExit(error_message)
-    
+
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     send_message(bot, 'Привет!')
