@@ -163,7 +163,6 @@ def main():
             logging.error(message)
             bot.send_message(TELEGRAM_CHAT_ID, message)
             time.sleep(RETRY_TIME)
-    
 
 
 if __name__ == '__main__':
