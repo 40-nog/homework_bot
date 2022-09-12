@@ -34,15 +34,23 @@ HOMEWORK_STATUSES = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
+control_message = ''
+
 
 def send_message(bot, message):
     """Отправляет сообщение в чат Телеграм."""
+    global control_message
     logging.info('Пробуем отправить сообщение')
-    try:
-        bot.send_message(TELEGRAM_CHAT_ID, message)
-        logging.info('Сообщение успешно отправлено')
-    except Exception:
-        logging.error('Не удалось отправить сообщение')
+    if message == control_message:
+        pass
+    else:
+        try:
+            bot.send_message(TELEGRAM_CHAT_ID, message)
+            logging.info('Сообщение успешно отправлено')
+        except Exception:
+            logging.error('Не удалось отправить сообщение')
+        finally:
+            control_message = message
 
 
 def get_api_answer(current_timestamp):
